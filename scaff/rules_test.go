@@ -6,7 +6,7 @@ import (
 )
 
 func TestCamelCase_Replace(t *testing.T) {
-	bag := map[string]string {
+	bag := map[string]string{
 		"test": "boo burns",
 	}
 
@@ -15,8 +15,24 @@ func TestCamelCase_Replace(t *testing.T) {
 	assert.Equal(t, formatter.Replace("__camel_test__"), "boo Burns")
 }
 
+func TestCamelCaseFullText_Replace(t *testing.T) {
+	bag := map[string]string{
+		"test": "boo burns",
+	}
+
+	formatter := NewRuleFormatter(bag)
+
+	assert.Equal(t, `
+foo bar boo Burns test foo
+bar foo boo Burns bar foo
+`, formatter.Replace(`
+foo bar __camel_test__ test foo
+bar foo __camel_test__ bar foo
+`))
+}
+
 func TestLowerCase_Replace(t *testing.T) {
-	bag := map[string]string {
+	bag := map[string]string{
 		"test": "BOOURNS",
 	}
 
@@ -26,7 +42,7 @@ func TestLowerCase_Replace(t *testing.T) {
 }
 
 func TestSnakeCase_Replace(t *testing.T) {
-	bag := map[string]string {
+	bag := map[string]string{
 		"test": "boo urns",
 	}
 
@@ -36,7 +52,7 @@ func TestSnakeCase_Replace(t *testing.T) {
 }
 
 func TestUpperCase_Replace(t *testing.T) {
-	bag := map[string]string {
+	bag := map[string]string{
 		"test": "boo urns",
 	}
 

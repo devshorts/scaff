@@ -6,10 +6,12 @@ import (
 	"sort"
 	"strings"
 	"math"
+	"github.com/sirupsen/logrus"
+	"fmt"
+	"io/ioutil"
 )
 
 type FileResolver struct {
-
 }
 
 func NewFileResolver() FileResolver {
@@ -56,6 +58,21 @@ func (f FileResolver) popSegment(path string) (string, string) {
 	return split[idx], strings.Join(remaining, "/")
 }
 
-func (f FileResolver) RepairPath(path string, formatter RuleRunner) {
-	
+func (f FileResolver) TemplatePath(path string, formatter RuleRunner, dryRun bool) {
+	segment, remaining := f.popSegment(path)
+
+	updated := formatter.Replace(segment)
+
+	newPath := filepath.Join(remaining, updated)
+
+	if newPath != path {
+		logrus.Info(fmt.Sprintf("Updating %s to %s. DryRun %t", path, newPath, dryRun))
+
+		if !dryRun {
+			os.Rename(path, newPath)
+		}
+	}
+}
+func (f FileResolver) TemplateFile(info os.FileInfo, runner RuleRunner, b bool) {
+	ioutil.ReadFile(info.Name())
 }

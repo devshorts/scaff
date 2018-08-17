@@ -6,20 +6,20 @@ import (
 )
 
 type ReplacementRule interface {
-	Replace(segment string) (string, bool)
+	Replace(text string) (string, bool)
 }
 
 type RuleName string
 
-// Given a text segment and a rule, see if the subsequent
+// Given a text text and a rule, see if the subsequent
 // text matches the rule. For example "__camel_Foo__"
 // should match "Foo" if the id is "camel".
-func extractFormatToken(ruleName RuleName, segment string) (string, bool) {
+func extractFormatToken(ruleName RuleName, text string) (string, bool) {
 	re := regexp.MustCompile("__" + string(ruleName) + "_(.*)__")
 
-	match := re.FindStringSubmatch(segment)
+	match := re.FindStringSubmatch(text)
 
-	if len(match) != 2 {
+	if len(match) < 2 {
 		return "", false
 	}
 
@@ -43,36 +43,44 @@ func (runner RuleRunner) getRules() []ReplacementRule {
 	}
 }
 
-func (runner RuleRunner) Replace(segment string) string {
+func (runner RuleRunner) Replace(text string) string {
 	for _, rule := range runner.getRules() {
-		if replaced, ok := rule.Replace(segment); ok {
-			return replaced
+		if replaced, ok := rule.Replace(text); ok {
+			text = replaced
 		}
 	}
 
-	return segment
+	return text
 }
 
 // Applies an id rule
-func (runner RuleRunner) processSegment(
-	segment string,
+func (runner RuleRunner) processText(
+	text string,
 	ruleName RuleName,
 	processor func(string) string) (string, bool) {
-	if result, ok := extractFormatToken(ruleName, segment); ok {
-		if replace, ok := runner.ctx[result]; ok {
-			return processor(replace), true
-		}
-	}
 
-	return "", false
+	re := regexp.MustCompile("__" + string(ruleName) + "_(.*)__")
+
+	result := re.ReplaceAllStringFunc(text, func(match string) string {
+		if token, ok := extractFormatToken(ruleName, match); ok {
+			if replace, ok := runner.ctx[token]; ok {
+				return processor(replace)
+			}
+		}
+
+		return match
+	})
+
+
+	return result, true
 }
 
 type CamelCase struct {
 	runner RuleRunner
 }
 
-func (c CamelCase) Replace(segment string) (string, bool) {
-	return c.runner.processSegment(segment, RuleName("camel"), func(s string) string {
+func (c CamelCase) Replace(text string) (string, bool) {
+	return c.runner.processText(text, RuleName("camel"), func(s string) string {
 		title := strings.Title(s)
 
 		return strings.ToLower(string(title[0])) + title[1:]
@@ -85,8 +93,8 @@ type SnakeCase struct {
 	runner RuleRunner
 }
 
-func (c SnakeCase) Replace(segment string) (string, bool) {
-	return c.runner.processSegment(segment, RuleName("snake"), func(s string) string {
+func (c SnakeCase) Replace(text string) (string, bool) {
+	return c.runner.processText(text, RuleName("snake"), func(s string) string {
 		return strings.Replace(s, " ", "_", -1)
 	})
 }
@@ -97,8 +105,8 @@ type UpperCase struct {
 	runner RuleRunner
 }
 
-func (c UpperCase) Replace(segment string) (string, bool) {
-	return c.runner.processSegment(segment, RuleName("upper"), func(s string) string {
+func (c UpperCase) Replace(text string) (string, bool) {
+	return c.runner.processText(text, RuleName("upper"), func(s string) string {
 		return strings.ToUpper(s)
 	})
 }
@@ -109,8 +117,8 @@ type LowerCase struct {
 	runner RuleRunner
 }
 
-func (c LowerCase) Replace(segment string) (string, bool) {
-	return c.runner.processSegment(segment, RuleName("lower"), func(s string) string {
+func (c LowerCase) Replace(text string) (string, bool) {
+	return c.runner.processText(text, RuleName("lower"), func(s string) string {
 		return strings.ToLower(s)
 	})
 }

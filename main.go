@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"github.com/jessevdk/go-flags"
 	"os"
 	"github.com/devshorts/scaff/scaff"
@@ -10,9 +9,12 @@ import (
 func main() {
 	var opts struct {
 		Dir string `short:"d" long:"directory" description:"Source directory" required:"true"`
+		DryRun bool `long:"dry_run" description:"Dry Run"`
 	}
 
-	if _, e := flags.ParseArgs(&opts, flag.Args()); e != nil {
+	parser := flags.NewParser(&opts, flags.Default)
+
+	if _, e := parser.Parse(); e != nil {
 		os.Exit(-1)
 	}
 
@@ -24,5 +26,11 @@ func main() {
 
 	rules := scaff.NewRuleFormatter(bag)
 
+	for _, dir := range resolver.GetAllDirs(opts.Dir) {
+		resolver.TemplatePath(dir, rules, opts.DryRun)
+	}
 
+	for _, file := range resolver.GetAllFiles(opts.Dir) {
+		resolver.TemplateFile(file, rules, opts.DryRun)
+	}
 }
