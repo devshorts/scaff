@@ -3,6 +3,13 @@ scaff
 
 Super simple `scaff`older.  Scaffolds paths and files using simple rules driven by a yml file.
 
+# Installation
+
+```
+git clone https://github.com/devshorts/scaff.git
+cd scaff && go install
+```
+
 YML file is of the form:
 
 ```yaml
