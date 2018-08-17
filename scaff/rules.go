@@ -11,11 +11,24 @@ type ReplacementRule interface {
 
 type RuleName string
 
+func (RuleRunner) tokenRegex(ruleName RuleName, tokenDelimiter string) *regexp.Regexp {
+	// if there are special chars in the token, escape them
+	escapedRegexValues := []string { "$" }
+
+	for _, escapedValue := range escapedRegexValues {
+		tokenDelimiter = strings.Replace(tokenDelimiter, escapedValue, "\\" + escapedValue, -1)
+	}
+
+	re := regexp.MustCompile(tokenDelimiter + string(ruleName) + "_(.*)" + tokenDelimiter)
+
+	return re
+}
+
 // Given a text text and a rule, see if the subsequent
 // text matches the rule. For example "__camel_Foo__"
 // should match "Foo" if the id is "camel".
-func extractFormatToken(ruleName RuleName, text string) (string, bool) {
-	re := regexp.MustCompile("__" + string(ruleName) + "_(.*)__")
+func (r RuleRunner) extractFormatToken(ruleName RuleName, text string, tokenDelimiter string) (string, bool) {
+	re := r.tokenRegex(ruleName, tokenDelimiter)
 
 	match := re.FindStringSubmatch(text)
 
@@ -27,26 +40,28 @@ func extractFormatToken(ruleName RuleName, text string) (string, bool) {
 }
 
 type RuleRunner struct {
-	ctx map[string]string
+	ctx    map[string]string
 }
 
-func NewRuleFormatter(bag map[string]string) RuleRunner {
-	return RuleRunner{ctx: bag}
-}
-
-func (runner RuleRunner) getRules() []ReplacementRule {
-	return []ReplacementRule{
-		CamelCase{runner: runner},
-		SnakeCase{runner: runner},
-		LowerCase{runner: runner},
-		UpperCase{runner: runner},
-		PackageRule{runner:runner},
-		IdRule{runner:runner},
+func NewRuleRunner(bag map[string]string) RuleRunner {
+	return RuleRunner{
+		ctx:    bag,
 	}
 }
 
-func (runner RuleRunner) Replace(text string) string {
-	for _, rule := range runner.getRules() {
+func (runner RuleRunner) getRules(tokenDelimiter string) []ReplacementRule {
+	return []ReplacementRule{
+		CamelCase{Rule{runner: runner, tokenDelimiter: tokenDelimiter}},
+		SnakeCase{Rule{runner: runner, tokenDelimiter: tokenDelimiter}},
+		LowerCase{Rule{runner: runner, tokenDelimiter: tokenDelimiter}},
+		UpperCase{Rule{runner: runner, tokenDelimiter: tokenDelimiter}},
+		PackageRule{Rule{runner: runner, tokenDelimiter: tokenDelimiter}},
+		IdRule{Rule{runner: runner, tokenDelimiter: tokenDelimiter}},
+	}
+}
+
+func (runner RuleRunner) Replace(text string, tokenDelimiter string) string {
+	for _, rule := range runner.getRules(tokenDelimiter) {
 		if replaced, ok := rule.Replace(text); ok {
 			text = replaced
 		}
@@ -59,12 +74,13 @@ func (runner RuleRunner) Replace(text string) string {
 func (runner RuleRunner) processText(
 	text string,
 	ruleName RuleName,
+	tokenDelimiter string,
 	processor func(string) string) (string, bool) {
 
-	re := regexp.MustCompile("__" + string(ruleName) + "_(.*)__")
+	re := runner.tokenRegex(ruleName, tokenDelimiter)
 
 	result := re.ReplaceAllStringFunc(text, func(match string) string {
-		if token, ok := extractFormatToken(ruleName, match); ok {
+		if token, ok := runner.extractFormatToken(ruleName, match, tokenDelimiter); ok {
 			if replace, ok := runner.ctx[token]; ok {
 				return processor(replace)
 			}
@@ -73,83 +89,109 @@ func (runner RuleRunner) processText(
 		return match
 	})
 
-
 	return result, true
 }
 
+type Rule struct {
+	runner         RuleRunner
+	tokenDelimiter string
+}
 type CamelCase struct {
-	runner RuleRunner
+	Rule
 }
 
 func (c CamelCase) Replace(text string) (string, bool) {
-	return c.runner.processText(text, RuleName("camel"), func(s string) string {
-		title := strings.Title(s)
+	return c.runner.processText(
+		text,
+		RuleName("camel"),
+		c.tokenDelimiter,
+		func(s string) string {
+			title := strings.Title(s)
 
-		return strings.ToLower(string(title[0])) + title[1:]
-	})
+			return strings.ToLower(string(title[0])) + title[1:]
+		})
 }
 
 var _ ReplacementRule = CamelCase{}
 
 type SnakeCase struct {
-	runner RuleRunner
+	Rule
 }
 
 func (c SnakeCase) Replace(text string) (string, bool) {
-	return c.runner.processText(text, RuleName("snake"), func(s string) string {
-		return strings.Replace(s, " ", "_", -1)
-	})
+	return c.runner.processText(
+		text,
+		RuleName("snake"),
+		c.tokenDelimiter,
+		func(s string) string {
+			return strings.Replace(s, " ", "_", -1)
+		})
 }
 
 var _ ReplacementRule = SnakeCase{}
 
 type UpperCase struct {
-	runner RuleRunner
+	Rule
 }
 
 func (c UpperCase) Replace(text string) (string, bool) {
-	return c.runner.processText(text, RuleName("upper"), func(s string) string {
-		return strings.ToUpper(s)
-	})
+	return c.runner.processText(
+		text,
+		RuleName("upper"),
+		c.tokenDelimiter,
+		func(s string) string {
+			return strings.ToUpper(s)
+		})
 }
 
 var _ ReplacementRule = UpperCase{}
 
 type LowerCase struct {
-	runner RuleRunner
+	Rule
 }
 
 func (c LowerCase) Replace(text string) (string, bool) {
-	return c.runner.processText(text, RuleName("lower"), func(s string) string {
-		return strings.ToLower(s)
-	})
+	return c.runner.processText(
+		text,
+		RuleName("lower"),
+		c.tokenDelimiter,
+		func(s string) string {
+			return strings.ToLower(s)
+		})
 }
 
 var _ ReplacementRule = LowerCase{}
 
 // Replace text of a.b.c to a/b/c
 type PackageRule struct {
-	runner RuleRunner
+	Rule
 }
 
 func (c PackageRule) Replace(text string) (string, bool) {
-	return c.runner.processText(text, RuleName("pkg"), func(s string) string {
-		return strings.Replace(s, ".", "/", -1)
-	})
+	return c.runner.processText(
+		text,
+		RuleName("pkg"),
+		c.tokenDelimiter,
+		func(s string) string {
+			return strings.Replace(s, ".", "/", -1)
+		})
 }
 
 var _ ReplacementRule = PackageRule{}
 
 // Do nothing but swap placeholders
 type IdRule struct {
-	runner RuleRunner
+	Rule
 }
 
 func (c IdRule) Replace(text string) (string, bool) {
-	return c.runner.processText(text, RuleName("id"), func(s string) string {
-		return s
-	})
+	return c.runner.processText(
+		text,
+		RuleName("id"),
+		c.tokenDelimiter,
+		func(s string) string {
+			return s
+		})
 }
 
 var _ ReplacementRule = IdRule{}
-

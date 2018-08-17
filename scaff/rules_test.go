@@ -10,9 +10,9 @@ func TestCamelCase_Replace(t *testing.T) {
 		"test": "boo burns",
 	}
 
-	formatter := NewRuleFormatter(bag)
+	formatter := NewRuleRunner(bag)
 
-	assert.Equal(t, formatter.Replace("__camel_test__"), "boo Burns")
+	assert.Equal(t, formatter.Replace("__camel_test__", DEFAULT_DELIM), "boo Burns")
 }
 
 func TestCamelCaseFullText_Replace(t *testing.T) {
@@ -20,7 +20,7 @@ func TestCamelCaseFullText_Replace(t *testing.T) {
 		"test": "boo burns",
 	}
 
-	formatter := NewRuleFormatter(bag)
+	formatter := NewRuleRunner(bag)
 
 	assert.Equal(t, `
 foo bar boo Burns test foo
@@ -28,7 +28,7 @@ bar foo boo Burns bar foo
 `, formatter.Replace(`
 foo bar __camel_test__ test foo
 bar foo __camel_test__ bar foo
-`))
+`, DEFAULT_DELIM))
 }
 
 func TestLowerCase_Replace(t *testing.T) {
@@ -36,9 +36,9 @@ func TestLowerCase_Replace(t *testing.T) {
 		"test": "BOOURNS",
 	}
 
-	formatter := NewRuleFormatter(bag)
+	formatter := NewRuleRunner(bag)
 
-	assert.Equal(t, formatter.Replace("__lower_test__"), "boourns")
+	assert.Equal(t, formatter.Replace("__lower_test__", DEFAULT_DELIM), "boourns")
 }
 
 func TestIdRule(t *testing.T) {
@@ -46,9 +46,9 @@ func TestIdRule(t *testing.T) {
 		"test": "BOOURNS",
 	}
 
-	formatter := NewRuleFormatter(bag)
+	formatter := NewRuleRunner(bag)
 
-	assert.Equal(t, formatter.Replace("__id_test__"), "BOOURNS")
+	assert.Equal(t, formatter.Replace("__id_test__", DEFAULT_DELIM), "BOOURNS")
 }
 
 func TestPkgRule(t *testing.T) {
@@ -56,9 +56,9 @@ func TestPkgRule(t *testing.T) {
 		"test": "a.b.c",
 	}
 
-	formatter := NewRuleFormatter(bag)
+	formatter := NewRuleRunner(bag)
 
-	assert.Equal(t, formatter.Replace("__pkg_test__"), "a/b/c")
+	assert.Equal(t, formatter.Replace("__pkg_test__", DEFAULT_DELIM), "a/b/c")
 }
 
 func TestSnakeCase_Replace(t *testing.T) {
@@ -66,9 +66,9 @@ func TestSnakeCase_Replace(t *testing.T) {
 		"test": "boo urns",
 	}
 
-	formatter := NewRuleFormatter(bag)
+	formatter := NewRuleRunner(bag)
 
-	assert.Equal(t, formatter.Replace("__snake_test__"), "boo_urns")
+	assert.Equal(t, formatter.Replace("__snake_test__", DEFAULT_DELIM), "boo_urns")
 }
 
 func TestUpperCase_Replace(t *testing.T) {
@@ -76,7 +76,17 @@ func TestUpperCase_Replace(t *testing.T) {
 		"test": "boo urns",
 	}
 
-	formatter := NewRuleFormatter(bag)
+	formatter := NewRuleRunner(bag)
 
-	assert.Equal(t, formatter.Replace("__upper_test__"), "BOO URNS")
+	assert.Equal(t, formatter.Replace("__upper_test__", DEFAULT_DELIM), "BOO URNS")
+}
+
+func TestCustomDelim(t *testing.T) {
+	bag := map[string]string{
+		"test": "boo urns",
+	}
+
+	formatter := NewRuleRunner(bag)
+
+	assert.Equal(t, formatter.Replace("$$upper_test$$", "$$"), "BOO URNS")
 }

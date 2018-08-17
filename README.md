@@ -42,6 +42,9 @@ context:
     verify_hook:
       command: python
       args:  [-c, import sys; sys.exit(0)]
+file_config:
+  lang_delims:
+    .js: $$
 ```
 
 All fields will need to be set when requested by the user, either via a default or inputed 
@@ -76,4 +79,8 @@ Scaff supports post set hooks (but pre templating) that you can tap into.
 Examples can be things like verifying keys start with certain prefixes, or exclude characters, etc.  
 The delegation spawns a subshell to execute, so it is extensible for your needs.
 
+## Language delimiters
 
+Different languages have different identifier semantics. The default rule delim is `__`
+but you can specify custom delimiters for file extensions, such that where `__` doesn't 
+compile or validate as a valid identifier, you can replace it whatever you want.  

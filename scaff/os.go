@@ -13,10 +13,13 @@ import (
 )
 
 type FileResolver struct {
+	config FileConfig
 }
 
-func NewTemplator() FileResolver {
-	return FileResolver{}
+const DEFAULT_DELIM = "__"
+
+func NewTemplator(config FileConfig) FileResolver {
+	return FileResolver{config}
 }
 
 func (f FileResolver) GetAllDirs(path string) []string {
@@ -70,7 +73,9 @@ func (f FileResolver) popSegment(path string) (string, string) {
 func (f FileResolver) TemplatePath(path string, formatter RuleRunner, dryRun bool) {
 	segment, remaining := f.popSegment(path)
 
-	updated := formatter.Replace(segment)
+	pathDelimiter := DEFAULT_DELIM
+
+	updated := formatter.Replace(segment, pathDelimiter)
 
 	newPath := filepath.Join(remaining, updated)
 
@@ -94,9 +99,18 @@ func (f FileResolver) TemplatePath(path string, formatter RuleRunner, dryRun boo
 func (f FileResolver) TemplateFile(info FileData, runner RuleRunner, dryRun bool) {
 	fileBytes, _ := ioutil.ReadFile(info.Path)
 
+	tokenDelimiter := DEFAULT_DELIM
+
+	fileExtension := filepath.Ext(info.Path)
+
+	// if we have a specific delimiter for rules in this file type use it
+	if delim, ok := f.config.FileDelims[fileExtension]; ok {
+		tokenDelimiter = delim
+	}
+
 	contents := string(fileBytes)
 
-	result := runner.Replace(contents)
+	result := runner.Replace(contents, tokenDelimiter)
 
 	if contents != result {
 		logrus.Info(fmt.Sprintf("Updating %s. DryRun %t", info.Path, dryRun))
@@ -105,4 +119,7 @@ func (f FileResolver) TemplateFile(info FileData, runner RuleRunner, dryRun bool
 			ioutil.WriteFile(info.Path, []byte(result), info.FileInfo.Mode())
 		}
 	}
+
+	// apply rules to the filename after processing file contents
+	f.TemplatePath(info.Path, runner, dryRun)
 }

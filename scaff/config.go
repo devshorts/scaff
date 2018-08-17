@@ -27,8 +27,13 @@ type ParsedValue struct {
 	ParsedValue string
 }
 
+type FileConfig struct {
+	FileDelims map[string]string `yaml:"lang_delims"`
+}
+
 type ScaffConfig struct {
-	Context UnresolvedConfig
+	Context    UnresolvedConfig
+	FileConfig FileConfig `yaml:"file_config"`
 }
 
 func (r ResolvedConfig) AsRaw() map[string]string {
