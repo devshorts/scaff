@@ -6,7 +6,7 @@ import (
 )
 
 func TestGetDirs(t *testing.T) {
-	names := NewFileResolver().GetAllDirs("../test")
+	names := NewTemplator().GetAllDirs("../test")
 
 	expectedDirs := []string{"../test/folder2/folder3", "../test/folder2", "../test/folder1", "../test"}
 
@@ -14,7 +14,7 @@ func TestGetDirs(t *testing.T) {
 }
 
 func TestPopSegment(t *testing.T) {
-	resolver := NewFileResolver()
+	resolver := NewTemplator()
 
 	path := "foo/bar/biz"
 	segment, remaining := resolver.popSegment(path)

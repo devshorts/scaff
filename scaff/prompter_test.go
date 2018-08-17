@@ -14,7 +14,7 @@ func TestPrompter(t *testing.T) {
 		},
 	}
 
-	result := NewPrompter().Resolve(c)
+	result := NewPrompter().ResolveBag(c)
 
 	assert.Equal(t, result["test"], "foo")
 }

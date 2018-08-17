@@ -14,7 +14,7 @@ import (
 type FileResolver struct {
 }
 
-func NewFileResolver() FileResolver {
+func NewTemplator() FileResolver {
 	return FileResolver{}
 }
 
@@ -34,12 +34,20 @@ func (f FileResolver) GetAllDirs(path string) []string {
 	return dirs
 }
 
-func (f FileResolver) GetAllFiles(path string) []os.FileInfo {
-	var files []os.FileInfo
+type FileData struct {
+	FileInfo os.FileInfo
+	Path string
+}
+
+func (f FileResolver) GetAllFiles(path string) []FileData {
+	var files []FileData
 
 	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
-			files = append(files, info)
+			files = append(files, FileData {
+				FileInfo:info,
+				Path: path,
+			})
 		}
 
 		return nil
@@ -73,6 +81,19 @@ func (f FileResolver) TemplatePath(path string, formatter RuleRunner, dryRun boo
 		}
 	}
 }
-func (f FileResolver) TemplateFile(info os.FileInfo, runner RuleRunner, b bool) {
-	ioutil.ReadFile(info.Name())
+
+func (f FileResolver) TemplateFile(info FileData, runner RuleRunner, dryRun bool) {
+	fileBytes, _ := ioutil.ReadFile(info.Path)
+
+	contents := string(fileBytes)
+
+	result := runner.Replace(contents)
+
+	if contents != result {
+		logrus.Info(fmt.Sprintf("Updating %s. DryRun %t", info.Path, dryRun))
+
+		if !dryRun {
+			ioutil.WriteFile(info.Path, []byte(result), info.FileInfo.Mode())
+		}
+	}
 }

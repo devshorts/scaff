@@ -20,17 +20,17 @@ func main() {
 
 	config := scaff.NewParser("").GetConfig(opts.Dir)
 
-	bag := scaff.NewPrompter().Resolve(config)
+	bag := scaff.NewPrompter().ResolveBag(config)
 
-	resolver := scaff.NewFileResolver()
+	templator := scaff.NewTemplator()
 
 	rules := scaff.NewRuleFormatter(bag)
 
-	for _, dir := range resolver.GetAllDirs(opts.Dir) {
-		resolver.TemplatePath(dir, rules, opts.DryRun)
+	for _, dir := range templator.GetAllDirs(opts.Dir) {
+		templator.TemplatePath(dir, rules, opts.DryRun)
 	}
 
-	for _, file := range resolver.GetAllFiles(opts.Dir) {
-		resolver.TemplateFile(file, rules, opts.DryRun)
+	for _, file := range templator.GetAllFiles(opts.Dir) {
+		templator.TemplateFile(file, rules, opts.DryRun)
 	}
 }

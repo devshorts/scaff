@@ -12,7 +12,7 @@ func NewPrompter() ContextPrompter {
 	return ContextPrompter{}
 }
 
-func (c ContextPrompter) Resolve(config ScaffConfig) map[string]string {
+func (c ContextPrompter) ResolveBag(config ScaffConfig) map[string]string {
 	bag := make(map[string]string)
 
 	reader := bufio.NewScanner(os.Stdin)
