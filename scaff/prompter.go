@@ -6,7 +6,6 @@ import (
 	"io"
 	"github.com/devshorts/scaff/scaff/sstring"
 	"os/exec"
-	"os"
 	"github.com/sirupsen/logrus"
 )
 
@@ -30,8 +29,6 @@ func (c BagResolver) ResolveBag() map[string]string {
 
 	c.confirmBag(bag)
 
-	c.postHookVerify(bag)
-
 	return bag.AsRaw()
 }
 
@@ -47,30 +44,30 @@ func (c BagResolver) parseBag() ResolvedConfig {
 			defaultDescription = " (" + v.Default + ")"
 		}
 
-		result := c.parseKeyFromInput(v, defaultDescription, scanner)
-
-		bag[k] = ParsedValue{
-			Source:      v,
-			ParsedValue: result,
-		}
+		bag[k] = c.parseKeyFromInput(v, defaultDescription, scanner)
 	}
 
 	return bag
 }
 
-func (c BagResolver) parseKeyFromInput(v TemplateValue, defaultDescription string, scanner *bufio.Scanner) string {
+func (c BagResolver) parseKeyFromInput(v TemplateValue, defaultDescription string, scanner *bufio.Scanner) ParsedValue {
 	fmt.Fprint(c.out, string(v.Description)+defaultDescription+": ")
 
 	scanner.Scan()
 
-	result := scanner.Text()
+	userInput := scanner.Text()
 
-	if len(result) == 0 && len(v.Default) > 0 {
-		result = v.Default
+	if len(userInput) == 0 && len(v.Default) > 0 {
+		userInput = v.Default
 	}
 
-	if sstring.IsEmpty(result) {
-		fmt.Fprintln(c.out, "Please set this field")
+	result := ParsedValue{
+		Source:      v,
+		ParsedValue: userInput,
+	}
+
+	if sstring.IsEmpty(result.ParsedValue) || !c.postHookVerify(result) {
+		fmt.Fprintln(c.out, fmt.Sprintf("A value of '%s' is invalid, please set it again", userInput))
 
 		result = c.parseKeyFromInput(v, defaultDescription, scanner)
 	}
@@ -95,29 +92,29 @@ func (c BagResolver) confirmBag(bag ResolvedConfig) {
 	bufio.NewScanner(c.stdin).Scan()
 }
 
-func (c BagResolver) postHookVerify(configs ResolvedConfig) {
-	for _, v := range configs {
-		if !sstring.IsEmpty(v.Source.VerifyHook.Command) {
-			args := v.Source.VerifyHook.Args
+func (c BagResolver) postHookVerify(parsed ParsedValue) bool {
+	if !sstring.IsEmpty(parsed.Source.VerifyHook.Command) {
+		args := parsed.Source.VerifyHook.Args
 
-			if !sstring.IsEmpty(v.ParsedValue) {
-				args = append(args, v.ParsedValue)
-			}
+		if !sstring.IsEmpty(parsed.ParsedValue) {
+			args = append(args, parsed.ParsedValue)
+		}
 
-			cmd := exec.Command(v.Source.VerifyHook.Command, args...)
+		cmd := exec.Command(parsed.Source.VerifyHook.Command, args...)
 
-			logrus.Info(fmt.Sprintf("Verifying %s with '%s %s'",
-				v.Source.Description,
-				v.Source.VerifyHook.Command,
-				args))
+		logrus.Debug(fmt.Sprintf("Verifying %s with '%s %s'",
+			parsed.Source.Description,
+			parsed.Source.VerifyHook.Command,
+			args))
 
-			err := cmd.Run()
+		err := cmd.Run()
 
-			if err != nil {
-				logrus.Error(fmt.Sprintf("Error %s", err))
+		if err != nil {
+			logrus.Warn(fmt.Sprintf("Error %s", err))
 
-				os.Exit(-1)
-			}
+			return false
 		}
 	}
+
+	return true
 }
