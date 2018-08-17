@@ -36,7 +36,7 @@ func (f FileResolver) GetAllDirs(path string) []string {
 
 type FileData struct {
 	FileInfo os.FileInfo
-	Path string
+	Path     string
 }
 
 func (f FileResolver) GetAllFiles(path string) []FileData {
@@ -44,9 +44,9 @@ func (f FileResolver) GetAllFiles(path string) []FileData {
 
 	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
-			files = append(files, FileData {
-				FileInfo:info,
-				Path: path,
+			files = append(files, FileData{
+				FileInfo: info,
+				Path:     path,
 			})
 		}
 
@@ -77,6 +77,14 @@ func (f FileResolver) TemplatePath(path string, formatter RuleRunner, dryRun boo
 		logrus.Info(fmt.Sprintf("Updating %s to %s. DryRun %t", path, newPath, dryRun))
 
 		if !dryRun {
+			_, remaining := f.popSegment(newPath)
+
+			if _, err := os.Stat(remaining); os.IsNotExist(err) {
+				originalPermissions, _ := os.Stat(path)
+
+				os.MkdirAll(remaining, originalPermissions.Mode())
+			}
+
 			os.Rename(path, newPath)
 		}
 	}
