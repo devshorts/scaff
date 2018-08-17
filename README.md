@@ -1,6 +1,8 @@
 scaff
 ==
 
+[![Build Status](https://travis-ci.org/devshorts/scaff.svg?branch=master)](https://travis-ci.org/devshorts/scaff)
+
 Super simple `scaff`older.  Scaffolds paths and files using simple rules driven by a yml file.
 
 ## Installation
@@ -8,6 +10,21 @@ Super simple `scaff`older.  Scaffolds paths and files using simple rules driven 
 ```
 git clone https://github.com/devshorts/scaff.git
 cd scaff && go install
+```
+
+## Usage
+
+```
+$ scaff -h
+Usage:
+  scaff [OPTIONS]
+
+Application Options:
+  -d, --directory= Source directory
+      --dry_run    Dry Run
+
+Help Options:
+  -h, --help       Show this help message
 ```
 
 ## Configuration
