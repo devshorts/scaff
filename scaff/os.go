@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"fmt"
 	"io/ioutil"
+	"github.com/devshorts/scaff/scaff/file"
 )
 
 type FileResolver struct {
@@ -79,7 +80,7 @@ func (f FileResolver) TemplatePath(path string, formatter RuleRunner, dryRun boo
 		if !dryRun {
 			_, remaining := f.popSegment(newPath)
 
-			if _, err := os.Stat(remaining); os.IsNotExist(err) {
+			if !file.Exists(remaining) {
 				originalPermissions, _ := os.Stat(path)
 
 				os.MkdirAll(remaining, originalPermissions.Mode())

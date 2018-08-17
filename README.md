@@ -21,8 +21,14 @@ context:
     description: My bar!
   data:
     description: My name!
+    # dummy verify hook that always succeeds
+    verify_hook:
+      command: python
+      args:  [-c, import sys; sys.exit(0)]
 ```
 
+All fields will need to be set when requested by the user, either via a default or inputed 
+by the user
 Where `foo` and `data` are keys to be used in rules like:
 
 ```
@@ -42,4 +48,14 @@ Rules are of the form `__ruleName_id__`.  Available rules are
 - `id` - only replaces the identifier in the template with the user supplied value
 
 Rules can be in the path or in text.
+
+## Post set hooks
+
+Often times just accepting any text isn't good enough for a scaffolder. You have
+business rules for certain keys and want to be able to validate them pre-templating.  
+Scaff supports post set hooks (but pre templating) that you can tap into.  
+
+Examples can be things like verifying keys start with certain prefixes, or exclude characters, etc.  
+The delegation spawns a subshell to execute, so it is extensible for your needs.
+
 

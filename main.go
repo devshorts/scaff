@@ -8,8 +8,8 @@ import (
 
 func main() {
 	var opts struct {
-		Dir string `short:"d" long:"directory" description:"Source directory" required:"true"`
-		DryRun bool `long:"dry_run" description:"Dry Run"`
+		Dir    string `short:"d" long:"directory" description:"Source directory" required:"true"`
+		DryRun bool   `long:"dry_run" description:"Dry Run"`
 	}
 
 	parser := flags.NewParser(&opts, flags.Default)
@@ -20,11 +20,7 @@ func main() {
 
 	config := scaff.NewParser("").GetConfig(opts.Dir)
 
-	prompter := scaff.NewPrompter()
-
-	bag := prompter.ResolveBag(config, os.Stdin)
-
-	prompter.ConfirmBag(bag, config, os.Stdout, os.Stdin)
+	bag := scaff.NewBagResolver(os.Stdin, os.Stdout, config).ResolveBag()
 
 	templator := scaff.NewTemplator()
 

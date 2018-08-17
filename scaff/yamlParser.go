@@ -22,18 +22,6 @@ func NewParser(sourceFile string) Parser {
 	return Parser{configFileName: target}
 }
 
-type Name string
-type Description string
-
-type TemplateValue struct {
-	Default string
-	Description Description
-}
-
-type ScaffConfig struct {
-	Context map[Name]TemplateValue
-}
-
 func (p Parser) GetConfig(path string) ScaffConfig {
 	bytes, _ := ioutil.ReadFile(filepath.Join(path, p.configFileName))
 

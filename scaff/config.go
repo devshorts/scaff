@@ -1,0 +1,41 @@
+package scaff
+
+type TemplateKey string
+
+func (x TemplateKey) AsRaw() string {
+	return string(x)
+}
+
+type Description string
+
+type ResolvedConfig map[TemplateKey]ParsedValue
+type UnresolvedConfig map[TemplateKey]TemplateValue
+
+type HookConfig struct {
+	Command string
+	Args []string
+}
+
+type TemplateValue struct {
+	Default     string
+	Description Description
+	VerifyHook HookConfig `yaml:"verify_hook"`
+}
+
+type ParsedValue struct {
+	Source      TemplateValue
+	ParsedValue string
+}
+
+type ScaffConfig struct {
+	Context UnresolvedConfig
+}
+
+func (r ResolvedConfig) AsRaw() map[string]string {
+	raw := make(map[string]string)
+	for k, v := range r {
+		raw[k.AsRaw()] = v.ParsedValue
+	}
+
+	return raw
+}
