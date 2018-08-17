@@ -15,7 +15,16 @@ cd scaff && go install
 ## Usage
 
 ```
-scaff -d <source folder with tempate code>
+$ scaff -h
+Usage:
+  scaff [OPTIONS]
+
+Application Options:
+  -d, --directory= Source directory
+      --dry_run    Dry Run
+
+Help Options:
+  -h, --help       Show this help message
 ```
 
 ## Configuration
