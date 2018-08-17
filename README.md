@@ -12,6 +12,12 @@ git clone https://github.com/devshorts/scaff.git
 cd scaff && go install
 ```
 
+## Usage
+
+```
+scaff -d <source folder with tempate code>
+```
+
 ## Configuration
 
 YML file is of the form:
