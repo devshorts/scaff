@@ -40,6 +40,8 @@ func (runner RuleRunner) getRules() []ReplacementRule {
 		SnakeCase{runner: runner},
 		LowerCase{runner: runner},
 		UpperCase{runner: runner},
+		PackageRule{runner:runner},
+		IdRule{runner:runner},
 	}
 }
 
@@ -124,3 +126,30 @@ func (c LowerCase) Replace(text string) (string, bool) {
 }
 
 var _ ReplacementRule = LowerCase{}
+
+// Replace text of a.b.c to a/b/c
+type PackageRule struct {
+	runner RuleRunner
+}
+
+func (c PackageRule) Replace(text string) (string, bool) {
+	return c.runner.processText(text, RuleName("pkg"), func(s string) string {
+		return strings.Replace(s, ".", "/", -1)
+	})
+}
+
+var _ ReplacementRule = PackageRule{}
+
+// Do nothing but swap placeholders
+type IdRule struct {
+	runner RuleRunner
+}
+
+func (c IdRule) Replace(text string) (string, bool) {
+	return c.runner.processText(text, RuleName("id"), func(s string) string {
+		return s
+	})
+}
+
+var _ ReplacementRule = IdRule{}
+

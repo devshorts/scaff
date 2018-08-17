@@ -41,6 +41,26 @@ func TestLowerCase_Replace(t *testing.T) {
 	assert.Equal(t, formatter.Replace("__lower_test__"), "boourns")
 }
 
+func TestIdRule(t *testing.T) {
+	bag := map[string]string{
+		"test": "BOOURNS",
+	}
+
+	formatter := NewRuleFormatter(bag)
+
+	assert.Equal(t, formatter.Replace("__id_test__"), "BOOURNS")
+}
+
+func TestPkgRule(t *testing.T) {
+	bag := map[string]string{
+		"test": "a.b.c",
+	}
+
+	formatter := NewRuleFormatter(bag)
+
+	assert.Equal(t, formatter.Replace("__pkg_test__"), "a/b/c")
+}
+
 func TestSnakeCase_Replace(t *testing.T) {
 	bag := map[string]string{
 		"test": "boo urns",
