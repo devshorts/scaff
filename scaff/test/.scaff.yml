@@ -1,3 +1,6 @@
 context:
-  foo: bar
-  biz: baz
+  foo:
+    default: default
+    description: bar
+  biz:
+    description: baz

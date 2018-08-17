@@ -20,7 +20,11 @@ func main() {
 
 	config := scaff.NewParser("").GetConfig(opts.Dir)
 
-	bag := scaff.NewPrompter().ResolveBag(config)
+	prompter := scaff.NewPrompter()
+
+	bag := prompter.ResolveBag(config, os.Stdin)
+
+	prompter.ConfirmBag(bag, config, os.Stdout, os.Stdin)
 
 	templator := scaff.NewTemplator()
 

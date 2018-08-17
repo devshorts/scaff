@@ -25,8 +25,13 @@ func NewParser(sourceFile string) Parser {
 type Name string
 type Description string
 
+type TemplateValue struct {
+	Default string
+	Description Description
+}
+
 type ScaffConfig struct {
-	Context map[Name]Description
+	Context map[Name]TemplateValue
 }
 
 func (p Parser) GetConfig(path string) ScaffConfig {
