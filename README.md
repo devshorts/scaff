@@ -17,14 +17,16 @@ cd scaff && go install
 ```
 $ scaff -h
 Usage:
-  scaff [OPTIONS]
+  main [OPTIONS]
 
 Application Options:
-  -d, --directory= Source directory
-      --dry_run    Dry Run
+  -d, --source_dir= Source directory containing templates
+  -t, --target_dir= Target directory to make with templated data
+      --scaff_file= Name of yaml file containing config. Defaults to .scaff.yml
+      --dry_run     Dry Run
 
 Help Options:
-  -h, --help       Show this help message
+  -h, --help        Show this help message
 ```
 
 ## Configuration

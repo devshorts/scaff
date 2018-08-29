@@ -1,5 +1,5 @@
 logtest
 *.iml
 *.idea
-scaffold_test
+scaffold_test_target
 debug

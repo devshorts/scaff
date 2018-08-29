@@ -1,16 +1,18 @@
 package main
 
 import (
+	"github.com/devshorts/scaff/scaff"
+	"github.com/otiai10/copy"
 	"github.com/jessevdk/go-flags"
 	"os"
-	"github.com/devshorts/scaff/scaff"
 )
 
 func main() {
 	var opts struct {
-		Dir    string `short:"d" long:"directory" description:"Source directory" required:"true"`
+		SourceDir       string `short:"d" long:"source_dir" description:"Source directory containing templates" required:"true"`
+		TargetDir       string `short:"t" long:"target_dir" description:"Target directory to make with templated data" required:"true"`
 		ScaffConfigFile string `long:"scaff_file" description:"Name of yaml file containing config. Defaults to .scaff.yml"`
-		DryRun bool   `long:"dry_run" description:"Dry Run"`
+		DryRun          bool   `long:"dry_run" description:"Dry Run"`
 	}
 
 	parser := flags.NewParser(&opts, flags.Default)
@@ -20,7 +22,7 @@ func main() {
 	}
 
 	// load a config from the scaff config file in the template directory
-	config := scaff.NewParser(opts.ScaffConfigFile).GetConfig(opts.Dir)
+	config := scaff.NewParser(opts.ScaffConfigFile).GetConfig(opts.SourceDir)
 
 	// given the key value pairs in the config, resolve them from stdin
 	// and verify they are correct
@@ -32,16 +34,18 @@ func main() {
 	// create the rules that allow for templating
 	rules := scaff.NewRuleRunner(bag)
 
+	copy.Copy(opts.SourceDir, opts.TargetDir)
+
 	// template rules to the directories sorted from longest
 	// to shortest. This allows us to rename and move directories
 	// without having stale data in the path list
-	for _, dir := range templator.GetAllDirs(opts.Dir) {
+	for _, dir := range templator.GetAllDirs(opts.TargetDir) {
 		templator.TemplatePath(dir, rules, opts.DryRun)
 	}
 
 	// once all directories have been moved apply the rules
 	// to files and file names
-	for _, file := range templator.GetAllFiles(opts.Dir) {
+	for _, file := range templator.GetAllFiles(opts.TargetDir) {
 		templator.TemplateFile(file, rules, opts.DryRun)
 	}
 }

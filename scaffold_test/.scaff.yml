@@ -1,0 +1,16 @@
+context:
+  foo:
+    default: 123
+    description: My bar!
+  name:
+    description: My name!
+    # fails if no args are passed in (i.e. unset)
+    verify_hook:
+      command: python
+      args:  [-c, import sys; sys.exit(-1) if len(sys.argv) <= 1 else sys.exit(0)]
+  p:
+    default: a.b.c
+    description: Target package
+file_config:
+  lang_delims:
+    .js: $$

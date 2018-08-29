@@ -39,6 +39,7 @@ func (r RuleRunner) extractFormatToken(ruleName RuleName, text string, tokenDeli
 	return match[1], true
 }
 
+
 type RuleRunner struct {
 	ctx    map[string]string
 }

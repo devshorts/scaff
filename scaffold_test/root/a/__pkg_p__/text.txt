@@ -1,0 +1,5 @@
+CamelCase: __camel_name__
+Identity: __id_name__
+SnakeCase: __snake_name__
+UpperCase: __upper_name__
+LowerCase: __lower_foo__
