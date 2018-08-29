@@ -2,9 +2,12 @@ package main
 
 import (
 	"github.com/devshorts/scaff/scaff"
-	"github.com/otiai10/copy"
+	"github.com/devshorts/scaff/scaff/file"
 	"github.com/jessevdk/go-flags"
+	"github.com/otiai10/copy"
+	"github.com/sirupsen/logrus"
 	"os"
+	"path/filepath"
 )
 
 func main() {
@@ -18,6 +21,12 @@ func main() {
 	parser := flags.NewParser(&opts, flags.Default)
 
 	if _, e := parser.Parse(); e != nil {
+		os.Exit(-1)
+	}
+
+	if file.Exists(opts.TargetDir) {
+		logrus.Warnf("%s already exists, please remove it before re-running", opts.TargetDir)
+
 		os.Exit(-1)
 	}
 
@@ -48,4 +57,7 @@ func main() {
 	for _, file := range templator.GetAllFiles(opts.TargetDir) {
 		templator.TemplateFile(file, rules, opts.DryRun)
 	}
+
+	// clear out the .scaff file in the target
+	os.Remove(filepath.Join(opts.TargetDir, opts.ScaffConfigFile))
 }
