@@ -34,7 +34,7 @@ type FileConfig struct {
 
 type GoRules struct {
 	SourcePackage string `yaml:"pkg"`
-	ReplaceRule   string `yalm:"replace_with_id"`
+	ReplaceRule   string `yaml:"replace_with_id"`
 }
 
 type LanguageRules struct {
