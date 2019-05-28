@@ -143,7 +143,7 @@ import "github.com/test/.scaffold/foo/bar
 Into
 
 ```
-import "github.com/test/.scaffold/foo/bar
+import "github.com/target/foo/bar
 
 // .. your go code
 ```
