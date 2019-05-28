@@ -85,4 +85,40 @@ The delegation spawns a subshell to execute, so it is extensible for your needs.
 
 Different languages have different identifier semantics. The default rule delim is `__`
 but you can specify custom delimiters for file extensions, such that where `__` doesn't 
-compile or validate as a valid identifier, you can replace it whatever you want.  
+compile or validate as a valid identifier, you can replace it whatever you want.
+
+## Language specific replacements
+
+Some langauges (like go) can't use custom delimiters to represent things like package pathing, 
+in such a way that would maintain compilation.  To that, you can add custom language specific
+format replacement mapping. Currently supported only for `go`. For example:
+
+ 
+```yaml
+context:
+  pkg:
+    default: github.com/target
+    description: The target package name 
+file_config:
+  lang_rules:
+    go:
+      pkg: "github.com/test/.scaffold"
+      replace_with_id: "pkg"
+```
+
+Notice how we are saying to replace `github.com/test/.scaffold` package root with the 
+result of the context identifier of `pkg`.  This will now transform:
+
+```
+import "github.com/test/.scaffold/foo/bar
+
+// .. your go code
+```
+
+Into
+
+```
+import "github.com/test/.scaffold/foo/bar
+
+// .. your go code
+```

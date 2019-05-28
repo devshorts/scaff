@@ -1,21 +1,23 @@
 package scaff
 
 import (
-	"fmt"
 	"bufio"
+	"fmt"
 	"io"
-	"github.com/devshorts/scaff/scaff/sstring"
 	"os/exec"
+
+	"github.com/devshorts/scaff/scaff/config"
+	"github.com/devshorts/scaff/scaff/sstring"
 	"github.com/sirupsen/logrus"
 )
 
 type BagResolver struct {
 	stdin  io.Reader
 	out    io.Writer
-	config ScaffConfig
+	config config.ScaffConfig
 }
 
-func NewBagResolver(stdin io.Reader, out io.Writer, config ScaffConfig) BagResolver {
+func NewBagResolver(stdin io.Reader, out io.Writer, config config.ScaffConfig) BagResolver {
 	return BagResolver{
 		stdin:  stdin,
 		out:    out,
@@ -32,8 +34,8 @@ func (c BagResolver) ResolveBag() map[string]string {
 	return bag.AsRaw()
 }
 
-func (c BagResolver) parseBag() ResolvedConfig {
-	bag := make(ResolvedConfig)
+func (c BagResolver) parseBag() config.ResolvedConfig {
+	bag := make(config.ResolvedConfig)
 
 	scanner := bufio.NewScanner(c.stdin)
 
@@ -50,7 +52,7 @@ func (c BagResolver) parseBag() ResolvedConfig {
 	return bag
 }
 
-func (c BagResolver) parseKeyFromInput(v TemplateValue, defaultDescription string, scanner *bufio.Scanner) ParsedValue {
+func (c BagResolver) parseKeyFromInput(v config.TemplateValue, defaultDescription string, scanner *bufio.Scanner) config.ParsedValue {
 	fmt.Fprint(c.out, string(v.Description)+defaultDescription+": ")
 
 	scanner.Scan()
@@ -61,7 +63,7 @@ func (c BagResolver) parseKeyFromInput(v TemplateValue, defaultDescription strin
 		userInput = v.Default
 	}
 
-	result := ParsedValue{
+	result := config.ParsedValue{
 		Source:      v,
 		ParsedValue: userInput,
 	}
@@ -75,13 +77,13 @@ func (c BagResolver) parseKeyFromInput(v TemplateValue, defaultDescription strin
 	return result
 }
 
-func (c BagResolver) confirmBag(bag ResolvedConfig) {
+func (c BagResolver) confirmBag(bag config.ResolvedConfig) {
 	fmt.Fprintln(c.out)
 	fmt.Fprintln(c.out, "!Verify!")
 	fmt.Fprintln(c.out)
 
 	for k, v := range bag {
-		desc := c.config.Context[TemplateKey(k)].Description
+		desc := c.config.Context[config.TemplateKey(k)].Description
 
 		fmt.Fprintln(c.out, fmt.Sprintf("%s = %s", desc, v.ParsedValue))
 	}
@@ -92,7 +94,7 @@ func (c BagResolver) confirmBag(bag ResolvedConfig) {
 	bufio.NewScanner(c.stdin).Scan()
 }
 
-func (c BagResolver) postHookVerify(parsed ParsedValue) bool {
+func (c BagResolver) postHookVerify(parsed config.ParsedValue) bool {
 	if !sstring.IsEmpty(parsed.Source.VerifyHook.Command) {
 		args := parsed.Source.VerifyHook.Args
 

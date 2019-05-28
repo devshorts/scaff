@@ -1,24 +1,27 @@
 package scaff
 
 import (
+	"fmt"
+	"io/ioutil"
+	"math"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
-	"math"
-	"github.com/sirupsen/logrus"
-	"fmt"
-	"io/ioutil"
+
+	"github.com/devshorts/scaff/scaff/config"
 	"github.com/devshorts/scaff/scaff/file"
+	"github.com/devshorts/scaff/scaff/lang"
+	"github.com/sirupsen/logrus"
 )
 
 type FileResolver struct {
-	config FileConfig
+	config config.FileConfig
 }
 
 const DEFAULT_DELIM = "__"
 
-func NewTemplator(config FileConfig) FileResolver {
+func NewTemplator(config config.FileConfig) FileResolver {
 	return FileResolver{config}
 }
 
@@ -111,6 +114,14 @@ func (f FileResolver) TemplateFile(info FileData, runner RuleRunner, dryRun bool
 	contents := string(fileBytes)
 
 	result := runner.Replace(contents, tokenDelimiter)
+
+	switch fileExtension {
+	case ".go":
+		if f.config.LanguageRules.Go != nil {
+			rules := *f.config.LanguageRules.Go
+			result = lang.NewGoProcessor(rules, runner.ctx).Process(result)
+		}
+	}
 
 	if contents != result {
 		logrus.Info(fmt.Sprintf("Updating %s. DryRun %t", info.Path, dryRun))

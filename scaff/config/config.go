@@ -1,4 +1,4 @@
-package scaff
+package config
 
 type TemplateKey string
 
@@ -13,13 +13,13 @@ type UnresolvedConfig map[TemplateKey]TemplateValue
 
 type HookConfig struct {
 	Command string
-	Args []string
+	Args    []string
 }
 
 type TemplateValue struct {
 	Default     string
 	Description Description
-	VerifyHook HookConfig `yaml:"verify_hook"`
+	VerifyHook  HookConfig `yaml:"verify_hook"`
 }
 
 type ParsedValue struct {
@@ -28,7 +28,17 @@ type ParsedValue struct {
 }
 
 type FileConfig struct {
-	FileDelims map[string]string `yaml:"lang_delims"`
+	FileDelims    map[string]string `yaml:"lang_delims"`
+	LanguageRules LanguageRules     `yaml:"lang_rules"`
+}
+
+type GoRules struct {
+	SourcePackage string `yaml:"pkg"`
+	ReplaceRule   string `yalm:"replace_with_id"`
+}
+
+type LanguageRules struct {
+	Go *GoRules `yaml:"go"`
 }
 
 type ScaffConfig struct {

@@ -1,9 +1,11 @@
 package scaff
 
 import (
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path/filepath"
+
+	"github.com/devshorts/scaff/scaff/config"
+	"gopkg.in/yaml.v2"
 )
 
 const defaultSourcePath string = ".scaff.yml"
@@ -22,10 +24,10 @@ func NewParser(sourceFile string) Parser {
 	return Parser{configFileName: target}
 }
 
-func (p Parser) GetConfig(path string) ScaffConfig {
+func (p Parser) GetConfig(path string) config.ScaffConfig {
 	bytes, _ := ioutil.ReadFile(filepath.Join(path, p.configFileName))
 
-	var config ScaffConfig
+	var config config.ScaffConfig
 
 	yaml.Unmarshal(bytes, &config)
 

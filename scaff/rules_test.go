@@ -2,6 +2,9 @@ package scaff
 
 import (
 	"testing"
+
+	"github.com/devshorts/scaff/scaff/config"
+	"github.com/devshorts/scaff/scaff/lang"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -89,4 +92,22 @@ func TestCustomDelim(t *testing.T) {
 	formatter := NewRuleRunner(bag)
 
 	assert.Equal(t, formatter.Replace("$$upper_test$$", "$$"), "BOO URNS")
+}
+
+func TestProcessGoPath(t *testing.T) {
+	bag := map[string]string{
+		"pkg": "github.com/test",
+	}
+
+	contents := `
+import "github.com/devshorts/scaff/scaff/file"
+`
+	result := lang.NewGoProcessor(config.GoRules{
+		SourcePackage: "github.com/devshorts",
+		ReplaceRule:   "pkg",
+	}, bag).Process(contents)
+
+	assert.Equal(t, result, `
+import "github.com/test/scaff/scaff/file"
+`)
 }

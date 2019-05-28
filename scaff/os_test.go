@@ -2,11 +2,13 @@ package scaff
 
 import (
 	"testing"
+
+	"github.com/devshorts/scaff/scaff/config"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetDirs(t *testing.T) {
-	names := NewTemplator(FileConfig{}).GetAllDirs("../test")
+	names := NewTemplator(config.FileConfig{}).GetAllDirs("../test")
 
 	expectedDirs := []string{"../test/folder2/folder3", "../test/folder2", "../test/folder1", "../test"}
 
@@ -14,7 +16,7 @@ func TestGetDirs(t *testing.T) {
 }
 
 func TestPopSegment(t *testing.T) {
-	resolver := NewTemplator(FileConfig{})
+	resolver := NewTemplator(config.FileConfig{})
 
 	path := "foo/bar/biz"
 	segment, remaining := resolver.popSegment(path)
