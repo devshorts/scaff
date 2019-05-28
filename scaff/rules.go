@@ -19,7 +19,7 @@ func (RuleRunner) tokenRegex(ruleName RuleName, tokenDelimiter string) *regexp.R
 		tokenDelimiter = strings.Replace(tokenDelimiter, escapedValue, "\\"+escapedValue, -1)
 	}
 
-	re := regexp.MustCompile(tokenDelimiter + string(ruleName) + "_(.*)" + tokenDelimiter)
+	re := regexp.MustCompile(tokenDelimiter + string(ruleName) + "_(.*?)" + tokenDelimiter)
 
 	return re
 }
@@ -82,7 +82,8 @@ func (runner RuleRunner) processText(
 	result := re.ReplaceAllStringFunc(text, func(match string) string {
 		if token, ok := runner.extractFormatToken(ruleName, match, tokenDelimiter); ok {
 			if replace, ok := runner.ctx[token]; ok {
-				return processor(replace)
+				x := processor(replace)
+				return x
 			}
 		}
 

@@ -31,7 +31,9 @@ func (c BagResolver) ResolveBag() map[string]string {
 
 	c.confirmBag(bag)
 
-	return bag.AsRaw()
+	raw := bag.AsRaw()
+
+	return raw
 }
 
 func (c BagResolver) parseBag() config.ResolvedConfig {

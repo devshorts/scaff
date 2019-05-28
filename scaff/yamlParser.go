@@ -8,14 +8,14 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const defaultSourcePath string = ".scaff.yml"
+const DefaultSourcePath string = ".scaff.yml"
 
 type Parser struct {
 	configFileName string
 }
 
 func NewParser(sourceFile string) Parser {
-	target := defaultSourcePath
+	target := DefaultSourcePath
 
 	if sourceFile != "" {
 		target = sourceFile

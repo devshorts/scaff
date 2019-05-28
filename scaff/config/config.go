@@ -43,6 +43,7 @@ type LanguageRules struct {
 
 type ScaffConfig struct {
 	Context    UnresolvedConfig
+	Dynamics   map[string]string
 	FileConfig FileConfig `yaml:"file_config"`
 }
 

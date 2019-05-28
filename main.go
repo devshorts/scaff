@@ -1,13 +1,14 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/devshorts/scaff/scaff"
 	"github.com/devshorts/scaff/scaff/file"
 	"github.com/jessevdk/go-flags"
 	"github.com/otiai10/copy"
 	"github.com/sirupsen/logrus"
-	"os"
-	"path/filepath"
 )
 
 func main() {
@@ -58,6 +59,8 @@ func main() {
 		templator.TemplateFile(file, rules, opts.DryRun)
 	}
 
-	// clear out the .scaff file in the target
-	os.Remove(filepath.Join(opts.TargetDir, opts.ScaffConfigFile))
+	if opts.ScaffConfigFile == "" {
+		// clear out the .scaff file in the target
+		os.Remove(filepath.Join(opts.TargetDir, scaff.DefaultSourcePath))
+	}
 }

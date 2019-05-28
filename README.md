@@ -81,6 +81,31 @@ Scaff supports post set hooks (but pre templating) that you can tap into.
 Examples can be things like verifying keys start with certain prefixes, or exclude characters, etc.  
 The delegation spawns a subshell to execute, so it is extensible for your needs.
 
+## Contextual data
+
+Sometimes you want to create compound replacements that can only be made from previous results.
+
+This can be done like so:
+
+```yaml
+context:
+  foo:
+    default: 123
+    description: My bar!
+  data:
+    default: data
+    description: My name!  
+dynamics:
+  some_key: hello world! __id_foo_/__upper_data__
+```
+
+In this example, `some_key` uses the value of `foo` as is (by using the `id` rule) and then upper cases `data`
+into a compound string. When this done you can use the value of `dynamics` and it will have the value 
+
+```
+hello world! 123/DATA
+```
+
 ## Language delimiters
 
 Different languages have different identifier semantics. The default rule delim is `__`

@@ -14,4 +14,5 @@ func TestParser(t *testing.T) {
 	assert.Equal(t, context["biz"].Default, "")
 	assert.Equal(t, context["foo"].Description, config.Description("bar"))
 	assert.Equal(t, context["foo"].Default, "default")
+
 }
