@@ -147,3 +147,14 @@ import "github.com/test/.scaffold/foo/bar
 
 // .. your go code
 ```
+
+
+## As a library
+
+Use scaff yourself!
+
+```
+config := scaff.NewParser(opts.ScaffConfigFile).GetConfig(opts.SourceDir)
+	
+scaff.Template(config, opts)
+```
